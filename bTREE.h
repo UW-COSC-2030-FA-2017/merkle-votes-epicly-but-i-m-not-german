@@ -5,9 +5,11 @@
 #pragma once
 #include<list>
 #include <string>
+#include<queue>
 using namespace std;
 using std::string;
 using std::list;
+using std::queue;
 
 class bTREE
 {
@@ -18,6 +20,7 @@ class bTREE
 		treeNode * left;
 		treeNode * right;
 		treeNode();
+		void print();
     };
     
 private:
@@ -28,15 +31,16 @@ private:
 	int totalNodes;
 	int leafNodes;
 	int dataNodes;
-	bool opening = false;
+	bool opening;
 	queue<char> map;
 public:
     bTREE();
     ~bTREE();
     
+	void print(treeNode* root, int position);
 	treeNode populate(int height, treeNode front);
 	void newRow(list<treeNode> tooSmall);
-	void inTraversal(treeNode * root);
+	void inTraversal(treeNode root);
 	treeNode * findParent(treeNode * root);
 	int dataInserted();
     int numberOfNodes();
@@ -45,7 +49,7 @@ public:
     
    int find(string me, treeNode start);
     
-    string locate(string me, treeNode start);
+    string locate(string me);
     
     
     friend bool operator==(const bTREE& lhs, const bTREE& rhs);
