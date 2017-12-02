@@ -3,18 +3,27 @@
 //bTree.cpp
 //11/23/17
 #include "bTREE.h"
+#include<stdio.h>
 #include<iostream>
 #include<queue>
 using namespace::std;
 using std::queue;
 
 //struct node constructor
-bTREE::treeNode::treeNode(){}
+bTREE::treeNode::treeNode() {}
+bTREE::treeNode::~treeNode()
+{
+	if (left != 0 && right != 0)
+	{
+		delete left;
+		delete right;
+	}
+}
 void bTREE::treeNode::print() {
-	cout << "---" << endl << "Data: " << this->data << endl << "---" << endl;
-	cout << "Time: " << this->time << endl << "---" << endl;
-	if (this->isLeaf == true) { cout << "Node IS a leaf node" << endl << "---" << endl; } 
-	else{ cout << "Node is NOT a leaf node" << endl << "---" << endl; }
+	cout << "--- " << "Data: " << this->data << " ---" << endl;
+	cout << "Time: " << this->time << " ---" << endl;
+	if (this->isLeaf == true) { cout << "Node IS a leaf node ---" << endl; }
+	else { cout << "Node is NOT a leaf node ---" << endl; }
 
 }
 //look at descriptions in pMT.h for guidance on what you might need for these function to actually do
@@ -23,36 +32,55 @@ bTREE::bTREE()
 	tree;
 	opening = false;
 }
-bTREE::~bTREE(){}
+bTREE::~bTREE() {}
 
-//new Method: print tree.
+//New Method get Trunk returns trunk.
+bTREE::treeNode* bTREE::getTrunk()
+{
+	return trunk;
+}
+//new Method: padding helper function for print tree. followed by print function.
+void bTREE::padding(char c, int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		putchar(c);
+	}
+}
 void bTREE::print(treeNode* root, int pos)
 {
-	if (!root) { return; }
-	print(root->left, pos);
-	pos++;
-	cout <<"---"<< pos <<"---"<< "     ";
-	root->print();
-	print(root->right, pos);
+	if (root == NULL)
+	{
+		padding('\t', pos); 
+		puts("~|");
+	}
+	else
+	{
+		print(root->right, pos + 1);
+		padding('\t', pos);
+		printf("%d\n", root->data);
+		print(root->left, pos + 1);
+	}
 }
 //new Method: populate creates and returns an empty tree of a given size.
 bTREE::treeNode bTREE::populate(int height, treeNode front)
 {
-	treeNode top = front;
-	top.left = &treeNode();
-	top.right = &treeNode();
+	treeNode* top = &front;
+	top->left = new treeNode();
+	top->right = new treeNode();
 	int i = 2;
 	if( i <height)
 	{
-		front = populate(height-1, *top.left);
-		front = populate(height-1, *top.right);
+		front = populate(height-1, *top->left);
+		front = populate(height-1, *top->right);
 	}
-	front = top;
+	front = *top;
 	return front;
 }
 //new Method: inTraversal counts various types of nodes and sets leaf boolean value.
-void bTREE::inTraversal(treeNode root)
+void bTREE::inTraversal(treeNode *root)
 {
+	if (root == 0) { return; }
 	if (tree.size() == 0)
 	{
 		totalNodes = 0;
@@ -61,58 +89,72 @@ void bTREE::inTraversal(treeNode root)
 		cout << endl << "The Tree Is Empty. " << endl;
 	}
 	else {
-		totalNodes = 0;
-		leafNodes = 0;
-		dataNodes = 0;
-		if (root.left == nullptr && root.right == nullptr)
+		if (root->left == nullptr && root->right == nullptr)
 		{
-			root.isLeaf = true;
+			root->isLeaf = true;
 			totalNodes++;
 			leafNodes++;
-			if (root.data.size() != 0)
+			if (root->data.size() != 0)
 			{
 				dataNodes++;
 			}
 		}
 		else
 		{
-			root.isLeaf = false;
+			root->isLeaf = false;
 			totalNodes++;
-			if (root.data.size() != 0)
+			if (root->data.size() != 0)
 			{
 				dataNodes++;
 			}
-			if (root.left != nullptr) { inTraversal(*root.left); }
-			if (root.right != nullptr) { inTraversal(*root.right); }
+			if (root->left != nullptr) { inTraversal(root->left); }
+			if (root->right != nullptr) { inTraversal(root->right); }
 		}
 	}
 }
 //New method: newRow will copy the current tree into a new tree with twice the amount of AVAILABLE SLOTS for leaf nodes.
-void bTREE::newRow(list<treeNode> tooSmall)
+void bTREE::newRow(treeNode* tooSmall)
 {
-	inTraversal(*tooSmall.begin());
+	totalNodes = 0;
+	leafNodes = 0;
+	dataNodes = 0;
+	inTraversal(tooSmall);
 	int height = 0;
-	treeNode temp = *tooSmall.begin();
-	while (temp.isLeaf == false)
+	treeNode* temp = tooSmall;
+	while (temp->isLeaf == false)
 	{
 		height++;
-		temp = *temp.right;
+		temp = temp->right;
 	}
-	temp = *tooSmall.begin();
-	treeNode top = treeNode();
-	top.left = &temp;
-	top.right = &treeNode();
-	*top.right = populate(height, *top.right);
-	*tree.begin() = top;
+	temp = tooSmall;
+	treeNode* top = new treeNode();
+	top->left = temp;
+	treeNode* hold = new treeNode();
+	if (height > 1) 
+	{
+		top->right = &populate(height, *hold);
+	}
+	else
+	{
+		top->right = hold;
+	}
+	trunk = top;
+	totalNodes = 0;
+	leafNodes = 0;
+	dataNodes = 0;
+	inTraversal(trunk);
 }
 //New method: findParent will return a pointer to the root node of the next incpomplete subtree, OR nullptr if all nodes on last layer are leaf nodes.
 bTREE::treeNode * bTREE::findParent(treeNode * root)
 {
-	inTraversal(*root);
-	treeNode * hold = nullptr;
+	totalNodes = 0;
+	leafNodes = 0;
+	dataNodes = 0;
+	inTraversal(root);
+	treeNode * hold = 0;
 	if(root->isLeaf == false)
 	{
-		if (&root->left != nullptr && &root->right == nullptr)
+		if (root->left != 0 && root->right == 0)
 		{
 			opening = true;
 			hold = root;
@@ -128,47 +170,64 @@ bTREE::treeNode * bTREE::findParent(treeNode * root)
 }
 int bTREE::dataInserted()
 {
-	inTraversal(*tree.begin());
+	totalNodes = 0;
+	leafNodes = 0;
+	dataNodes = 0;
+	inTraversal(trunk);
 	return dataNodes;
 }
 
 int bTREE::numberOfNodes()
 {
-	inTraversal(*tree.begin());
+	totalNodes = 0;
+	leafNodes = 0;
+	dataNodes = 0;
+	inTraversal(trunk);
 	return totalNodes;
 }
 
 int bTREE::insert(string data, int time)
 {
-	treeNode node = treeNode();
-	node.data = data;
-	node.time = time;
+	treeNode* node = new treeNode();
+	node->data = data;
+	node->time = time;
 	if (tree.size() == 0)
 	{
-		treeNode empty = treeNode();
-		tree.push_front(empty);
-		empty.left = &node;
+		treeNode* empty = new treeNode();
+		tree.push_front(*empty);
+		trunk = empty;
+		trunk->left = node;
+		totalNodes = 0;
+		leafNodes = 0;
+		dataNodes = 0;
+		inTraversal(trunk);
 		return 1;
 	}
 	else {
-		treeNode start = *tree.begin();
-		treeNode * found = findParent(&start);
+		treeNode * found = findParent(trunk);
 		if (found->isLeaf == false)
 		{
-			*found->right = node;
+			found->right = node;
+			totalNodes = 0;
+			leafNodes = 0;
+			dataNodes = 0;
+			inTraversal(trunk);
 			return 1;
 		}
 		else
 		{
-			newRow(tree);
-			treeNode leaf = *tree.begin();
-			leaf = *leaf.right;
-			inTraversal(leaf);
-			while (leaf.isLeaf == false)
+			newRow(trunk);
+			treeNode* leaf = trunk;
+			leaf = leaf->right;
+			while (leaf->isLeaf == false)
 			{
-				leaf = *leaf.left;
+				leaf = leaf->left;
 			}
-			leaf.left = &node;
+			leaf->left = node;
+			totalNodes = 0;
+			leafNodes = 0;
+			dataNodes = 0;
+			inTraversal(trunk);
 			return 1;
 		}
 	}
@@ -197,7 +256,7 @@ string bTREE::locate(string me)
 {
 	queue<char> temp;
 	map.swap(temp);
-	find(me, *tree.begin());
+	find(me, *trunk);
 	string word;
 	while (map.size() != 0)
 	{
@@ -209,8 +268,8 @@ string bTREE::locate(string me)
 
  bool operator ==(const bTREE& lhs, const bTREE& rhs)
 {
-	 bTREE::treeNode startL = *lhs.tree.begin();
-	 bTREE::treeNode startR = *rhs.tree.begin();
+	 bTREE::treeNode startL = *lhs.trunk;
+	 bTREE::treeNode startR = *rhs.trunk;
 	 int i = 0;
 	 if (startL.data == startR.data) { i++; }
 	 if (lhs.leafNodes == rhs.leafNodes) { i++; }
@@ -222,21 +281,22 @@ string bTREE::locate(string me)
 
  bool operator !=(const bTREE& lhs, const bTREE& rhs)
 {
-	 bTREE::treeNode startL = *lhs.tree.begin();
-	 bTREE::treeNode startR = *rhs.tree.begin();
+	 bTREE::treeNode startL = *lhs.trunk;
+	 bTREE::treeNode startR = *rhs.trunk;
 	 int i = 0;
 	 if (startL.data == startR.data) { i++; }
 	 if (lhs.leafNodes == rhs.leafNodes) { i++; }
 	 if (lhs.dataNodes == rhs.dataNodes) { i++; }
 	 if (lhs.totalNodes == rhs.totalNodes) { i++; }
 	 if (i != 4) { return true; }
+	 else { return false; }
 }
 
  std::ostream& operator <<(std::ostream& out,const bTREE& p)
 {
 	 bTREE hold = p;
-	 bTREE::treeNode temp = *hold.tree.begin();
-	 hold.print(&temp, 0);
+	 bTREE::treeNode* temp = hold.trunk;
+	 hold.print(temp, 0);
 	 return out;
 }
 

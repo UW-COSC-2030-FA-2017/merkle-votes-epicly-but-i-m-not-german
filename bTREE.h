@@ -17,9 +17,10 @@ class bTREE
         string data;
         int time;
 		bool isLeaf;
-		treeNode * left;
-		treeNode * right;
+		treeNode * left = 0;
+		treeNode * right = 0;
 		treeNode();
+		~treeNode();
 		void print();
     };
     
@@ -27,21 +28,28 @@ private:
     //some data structure to hold your treeNodes together ...
     //DATASTUCTURE treeNodes tree;
     //any helper private variables you need
+
+
 	list<treeNode> tree;
+	treeNode* trunk;
 	int totalNodes;
 	int leafNodes;
 	int dataNodes;
 	bool opening;
 	queue<char> map;
+	
 public:
     bTREE();
     ~bTREE();
-    
+    //New Methods
+	treeNode* getTrunk();
+	void padding(char c, int n);
 	void print(treeNode* root, int position);
 	treeNode populate(int height, treeNode front);
-	void newRow(list<treeNode> tooSmall);
-	void inTraversal(treeNode root);
+	void newRow(treeNode* tooSmall);
+	void inTraversal(treeNode* root);
 	treeNode * findParent(treeNode * root);
+	//Required Methods
 	int dataInserted();
     int numberOfNodes();
     
