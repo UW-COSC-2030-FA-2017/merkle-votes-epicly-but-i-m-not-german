@@ -34,7 +34,7 @@ bTREE::bTREE()
 }
 bTREE::~bTREE() {}
 
-//newMethods return a pointer to the next empty node on the left or right.
+//newMethod: GetHash will iterate through the tree and set the correct hash keys with a reference to Merkle, then return the hash key for the root node.
 template <typename T>
 string  bTREE::treeNode::getHash(T mrkl, int type)
 {
@@ -48,6 +48,18 @@ string  bTREE::treeNode::getHash(T mrkl, int type)
 			data = mrkl->hash_1(values);
 			return data;
 		}
+		else if (type == 2)
+		{
+			string values = lval + rval;
+			data = mrkl->hash_2(values);
+			return data;
+		}
+		else if (type == 3)
+		{
+			string values = lval + rval;
+			data = mrkl->hash_3(values);
+			return data;
+		}
 	}
 	else if (left != 0 && right == 0 && !left->isLeaf)
 	{
@@ -55,6 +67,16 @@ string  bTREE::treeNode::getHash(T mrkl, int type)
 		if (type == 1)
 		{
 			data = mrkl->hash_1(lval);
+			return data;
+		}
+		else if (type == 2)
+		{
+			data = mrkl->hash_2(lval);
+			return data;
+		}
+		else if (type == 3)
+		{
+			data = mrkl->hash_3(lval);
 			return data;
 		}
 	}
@@ -66,33 +88,73 @@ string  bTREE::treeNode::getHash(T mrkl, int type)
 			data = mrkl->hash_1(rval);
 			return data;
 		}
+		else if (type == 2)
+		{
+			data = mrkl->hash_2(rval);
+			return data;
+		}
+		else if (type == 3)
+		{
+			data = mrkl->hash_3(rval);
+			return data;
+		}
 	}
 	else if (left != 0 && right != 0 && left->isLeaf == true && right->isLeaf == true)
 	{
 		string lval = left->data;
 		string rval = right->data;
 		string values = lval + rval;
-		if (type == 1)
+		 if (type == 1)
 		{
 			data = mrkl->hash_1(values);
+			return data;
+		}
+		else if (type == 2)
+		{
+			data = mrkl->hash_2(values);
+			return data;
+		}
+		else if (type == 3)
+		{
+			data = mrkl->hash_3(values);
 			return data;
 		}
 	}
 	else if (left != 0 && right == 0 && left->isLeaf)
 	{
 		string lval = left->data;
-		if (type == 1)
+		 if (type == 1)
 		{
 			data = mrkl->hash_1(lval);
+			return data;
+		}
+		else if (type == 2)
+		{
+			data = mrkl->hash_2(lval);
+			return data;
+		}
+		else if (type == 3)
+		{
+			data = mrkl->hash_3(lval);
 			return data;
 		}
 	}
 	else if (left == 0 && right != 0 && right->isLeaf)
 	{
 		string rval = right->data;
-		if (type == 1)
+		 if (type == 1)
 		{
 			data = mrkl->hash_1(rval);
+			return data;
+		}
+		else if (type == 2)
+		{
+			data = mrkl->hash_2(rval);
+			return data;
+		}
+		else if (type == 3)
+		{
+			data = mrkl->hash_3(rval);
 			return data;
 		}
 	}
@@ -128,6 +190,7 @@ void bTREE::print(treeNode* root, int pos)
 //new Method: populate creates and returns an empty tree of a given size.
 bTREE::treeNode bTREE::populate(int height, treeNode front)
 {
+	opCount++;
 	treeNode* top = &front;
 	top->left = new treeNode();
 	top->right = new treeNode();
@@ -143,6 +206,7 @@ bTREE::treeNode bTREE::populate(int height, treeNode front)
 //new Method: inTraversal counts various types of nodes and sets leaf boolean value.
 void bTREE::inTraversal(treeNode *root)
 {
+	opCount++;
 	if (root == 0) { return; }
 	if (tree.size() == 0)
 	{
@@ -178,6 +242,7 @@ void bTREE::inTraversal(treeNode *root)
 //New method: newRow will copy the current tree into a new tree with twice the amount of AVAILABLE SLOTS for leaf nodes.
 void bTREE::newRow(treeNode* tooSmall)
 {
+	opCount++;
 	totalNodes = 0;
 	leafNodes = 0;
 	dataNodes = 0;
@@ -210,6 +275,7 @@ void bTREE::newRow(treeNode* tooSmall)
 //New method: findParent will return a pointer to the root node of the next incpomplete subtree, OR nullptr if all nodes on last layer are leaf nodes.
 bTREE::treeNode * bTREE::findParent(treeNode * root)
 {
+	opCount++;
 	totalNodes = 0;
 	leafNodes = 0;
 	dataNodes = 0;
@@ -251,6 +317,7 @@ int bTREE::numberOfNodes()
 
 int bTREE::insert(string data, int time)
 {
+	opCount++;
 	treeNode* node = new treeNode();
 	node->data = data;
 	node->time = time;
@@ -297,6 +364,7 @@ int bTREE::insert(string data, int time)
 }
 int bTREE::findT(int me, treeNode start)
 {
+	opCount++;
 	int found = 0;
 	treeNode hold = start;
 	if (hold.time == me) { found = 1; return found; }
@@ -315,6 +383,7 @@ int bTREE::findT(int me, treeNode start)
 }
 int bTREE::find(string me, treeNode start)
 {
+	opCount++;
 	int found = 0;
 	treeNode hold = start;
 	if (hold.data == me) { found = 1; return found; }
@@ -333,6 +402,7 @@ int bTREE::find(string me, treeNode start)
 }
 string bTREE::locateT(int me)
 {
+	opCount++;
 	queue<char> temp;
 	map.swap(temp);
 	findT(me, *trunk);
@@ -346,6 +416,7 @@ string bTREE::locateT(int me)
 }
 string bTREE::locate(string me)
 {
+	opCount++;
 	queue<char> temp;
 	map.swap(temp);
 	find(me, *trunk);

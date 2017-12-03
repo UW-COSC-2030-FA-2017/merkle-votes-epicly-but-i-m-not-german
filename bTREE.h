@@ -42,6 +42,7 @@ private:
 	
 public:
 	treeNode*it;
+	int opCount;
 
     bTREE();
     ~bTREE();
