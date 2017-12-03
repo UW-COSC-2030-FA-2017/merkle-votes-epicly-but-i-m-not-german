@@ -1,6 +1,9 @@
+//Schuyler Vercauteren
+//12/1/2017
 #pragma once
 
 #include "bTREE.h"
+#include <iostream>
 #include <string>
 using namespace std;
 class pMT
@@ -14,16 +17,17 @@ private:
     string hash_3(string);
     
 public:
-    pMT(int);
+    pMT(int hashSelect);
     ~pMT();
     
+	void hashBranches();
+    int insert(string vote, int time);
     
-    int insert(string, int);
+    int find(string data, int time, int hashSelect);
+    int findHash(string mhash);
     
-    int find(string);
-    int findHash(string);
-    
-    string locate(string);
+    string locateData(string vote);
+	string locateHash(string mHash);
     
     friend bool operator==(const pMT& lhs, const pMT& rhs);
     
