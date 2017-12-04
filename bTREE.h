@@ -47,6 +47,7 @@ public:
     ~bTREE();
 
     //New Methods
+	string getDat(treeNode * node);
 	int getLeaves();
 	void setTrunk(treeNode* newTrunk);
 	treeNode* getTrunk();

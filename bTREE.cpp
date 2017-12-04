@@ -10,7 +10,7 @@ using namespace::std;
 using std::queue;
 
 //struct node constructor
-bTREE::treeNode::treeNode() {}
+bTREE::treeNode::treeNode() { time = 0; data = ""; isLeaf == false; }
 bTREE::treeNode::~treeNode()
 {
 	if (left != 0 && right != 0)
@@ -40,6 +40,14 @@ void bTREE::setTrunk(treeNode* sappling)
 	trunk = sappling;
 	inTraversal(trunk);
 }
+
+//new mwthods: returns data from referenced node.
+string bTREE::getDat(treeNode * node)
+{
+	string hold = node->data;
+	return hold;
+}
+
 //New Method: returns amount of leaf nodes.
 int bTREE::getLeaves()
 {

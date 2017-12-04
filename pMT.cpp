@@ -28,9 +28,6 @@ pMT::~pMT()
 void pMT::hashBranches(int select)
 {
 	vector<int> map;
-	string lval = "";
-	string rval = "";
-	string hash = "";
 	int leftToHash = myMerkle.numberOfNodes() - myMerkle.getLeaves();
 	int level = 0;
 	int j = 2;
@@ -60,15 +57,14 @@ void pMT::hashBranches(int select)
 	myMerkle.it = myMerkle.getTrunk();
 	while (leftToHash > 0)
 	{
+		string lval = "";
+		string rval = "";
+		string hash = "";
 		while (myMerkle.it->left->isLeaf == false)
 		{
 			myMerkle.it = myMerkle.it->left;
 		}
-		if (!myMerkle.it->left->data.empty())
-		{
-			lval = myMerkle.it->left->data;
-		}
-		else { lval = ""; }
+		lval = myMerkle.getDat(myMerkle.it->left);
 		if (myMerkle.it->right->data.size() != 0)
 		{
 			rval = myMerkle.it->right->data;
@@ -260,7 +256,7 @@ string pMT::hash_2(string key)
 	for (int i = key.size(); i >0; i--)
 	{
 		int hold = (keyCh[i] - 48);
-		hash = hold * hold +b;
+		hash = hold + hold *b;
 		b = b*b+a;
 	}
 	return hash;
@@ -278,7 +274,7 @@ string pMT::hash_3(string key)
 	int sum = 0;
 	for (int i = key.size(); i > 0; i--)
 	{
-		sum = sum + int(keyCh[i]) * 1313;
+		sum = sum + (int(keyCh[i]) * 2) * 1313;
 		hash += sum;
 	}
 	return hash;
