@@ -17,12 +17,11 @@ class bTREE
         string data;
         int time;
 		bool isLeaf;
+		treeNode* parent = 0;
 		treeNode * left = 0;
 		treeNode * right = 0;
 		treeNode();
 		~treeNode();
-		template <typename T>
-		string getHash(T mrkltree, int hash_type);
 		void print();
     };
     
@@ -42,12 +41,14 @@ private:
 	
 public:
 	treeNode*it;
+	int opCount;
 
     bTREE();
     ~bTREE();
 
     //New Methods
-
+	int getLeaves();
+	void setTrunk(treeNode* newTrunk);
 	treeNode* getTrunk();
 	void padding(char c, int n);
 	void print(treeNode* root, int position);
@@ -67,7 +68,7 @@ public:
     
     string locate(string me);
     
-    
+	friend bTREE * operator ^(const bTREE& lhs, const bTREE& rhs);
     friend bool operator==(const bTREE& lhs, const bTREE& rhs);
     friend bool operator!=(const bTREE& lhs, const bTREE& rhs);
 
