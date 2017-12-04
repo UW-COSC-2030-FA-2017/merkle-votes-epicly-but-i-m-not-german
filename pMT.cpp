@@ -60,16 +60,16 @@ void pMT::hashBranches(int select)
 		string lval = "";
 		string rval = "";
 		string hash = "";
-		while (myMerkle.it->left->isLeaf == false)
+		while (myMerkle.it->left &&	myMerkle.it->left->isLeaf == false)
 		{
 			myMerkle.it = myMerkle.it->left;
 		}
-		lval = myMerkle.getDat(myMerkle.it->left);
-		if (myMerkle.it->right->data.size() != 0)
-		{
-			rval = myMerkle.it->right->data;
+		if (myMerkle.it->left) {
+			lval = myMerkle.getDat(myMerkle.it->left);
 		}
-		else { rval = ""; }
+		if (myMerkle.it->right) {
+			rval = myMerkle.getDat(myMerkle.it->right);
+		}
 		if (select == 1)
 		{
 			hash = hash_1(lval + rval);
@@ -84,33 +84,33 @@ void pMT::hashBranches(int select)
 		}
 		myMerkle.it->data = hash;
 		leftToHash--;
-		for (int i =0; i<map[j]; i++)
-		{
-			myMerkle.it = myMerkle.it->parent;
-			if (myMerkle.it->left->data.size() != 0)
+		if (myMerkle.it->parent) {
+			for (int i = 0; i < map[j]; i++)
 			{
-				lval = myMerkle.it->left->data;
+				myMerkle.it = myMerkle.it->parent;
+				if (myMerkle.it->left) {
+					lval = myMerkle.getDat(myMerkle.it->left);
+				}
+				else { lval = ""; }
+				if (myMerkle.it->right) {
+					rval = myMerkle.getDat(myMerkle.it->right);
+				}
+				else { rval = ""; }
+				if (select == 1)
+				{
+					hash = hash_1(lval + rval);
+				}
+				if (select == 2)
+				{
+					hash = hash_2(lval + rval);
+				}
+				if (select == 3)
+				{
+					hash = hash_3(lval + rval);
+				}
 			}
-			else { lval = ""; }
-			if (myMerkle.it->right->data.size() != 0)
-			{
-				rval = myMerkle.it->right->data;
-			}
-			else { rval = ""; }
-			if (select == 1)
-			{
-				hash = hash_1(lval + rval);
-			}
-			if (select == 2)
-			{
-				hash = hash_2(lval + rval);
-			}
-			if (select == 3)
-			{
-				hash = hash_3(lval + rval);
-			}
+			myMerkle.it = myMerkle.it->right;
 		}
-		myMerkle.it = myMerkle.it->right;
 	}
 	myMerkle.it = myMerkle.it->parent;
 	myMerkle.setTrunk(myMerkle.it);
@@ -220,7 +220,22 @@ string pMT::locateHash(string mhash)
 	return ".";
 }
 
+//String to hash method.
+string pMT::string_to_hex(const string& input)
+{
+	static const char* const lut = "0123456789ABCDEF";
+	size_t len = input.length();
 
+	string output;
+	output.reserve(2 * len);
+	for (size_t i = 0; i < len; ++i)
+	{
+		const unsigned char c = input[i];
+		output.push_back(lut[c >> 4]);
+		output.push_back(lut[c & 15]);
+	}
+	return output;
+}
 
 string pMT::hash_1(string key)
 /**
@@ -235,10 +250,12 @@ string pMT::hash_1(string key)
 	int b = 23;
 	for (int i = 0; i < key.size(); i++)
 	{
-		int hold = (keyCh[i]%48);
-			hash = hold * a;
-			a = a * b + a;
+		int hold = (keyCh[i]);
+			hash += std::to_string(hold*a);
+			a = a + b;
 	}
+	string& A = hash;
+	hash = string_to_hex(A);
 	return hash;
 }
 
@@ -256,9 +273,11 @@ string pMT::hash_2(string key)
 	for (int i = key.size(); i >0; i--)
 	{
 		int hold = (keyCh[i] - 48);
-		hash = hold + hold *b;
+		hash = std::to_string(hold + hold *b);
 		b = b*b+a;
 	}
+	string& A = hash;
+	hash = string_to_hex(A);
 	return hash;
 }
 
@@ -275,8 +294,10 @@ string pMT::hash_3(string key)
 	for (int i = key.size(); i > 0; i--)
 	{
 		sum = sum + (int(keyCh[i]) * 2) * 1313;
-		hash += sum;
+		hash +=std::to_string(sum);
 	}
+	string& A = hash;
+	hash = string_to_hex(A);
 	return hash;
 }
 

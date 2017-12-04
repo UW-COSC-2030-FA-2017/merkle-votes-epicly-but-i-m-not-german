@@ -22,6 +22,7 @@ public:
     ~pMT();
     
 	//New Methods.
+	string string_to_hex(const string& input);
 	void hashBranches(int select);
 	void printRoot();
 	int getSelhash();

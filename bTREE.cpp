@@ -10,7 +10,7 @@ using namespace::std;
 using std::queue;
 
 //struct node constructor
-bTREE::treeNode::treeNode() { time = 0; data = ""; isLeaf == false; }
+bTREE::treeNode::treeNode() { time = 0; data = ""; isLeaf = false; }
 bTREE::treeNode::~treeNode()
 {
 	if (left != 0 && right != 0)
@@ -81,7 +81,7 @@ void bTREE::print(treeNode* root, int pos)
 	{
 		print(root->right, pos + 1);
 		padding('\t', pos);
-		printf("\n", root->data);
+		printf("%d \n", root->data);
 		print(root->left, pos + 1);
 	}
 }
@@ -179,7 +179,7 @@ bTREE::treeNode * bTREE::findParent(treeNode * root)
 	dataNodes = 0;
 	inTraversal(root);
 	treeNode * hold = 0;
-	if(root->isLeaf == false)
+	if(root->left && root->isLeaf == false)
 	{
 		if (root->left != 0 && root->right == 0)
 		{
