@@ -15,7 +15,7 @@ int main()
 	int time;
 	pMT* firstTree = new pMT(1);
 	pMT* secondTree = new pMT(2);
-	pMT* thirdTree = new pMT(2);
+	pMT* thirdTree = new pMT(3);
 	sel = 1;
 	if (sel == 1) {
 		// Read in a single file and store it in Merkle Tree
@@ -32,7 +32,7 @@ int main()
 			List.close();
 		}
 		else { cout << endl << "could not open file" << endl; List.close(); }
-		cout << "The Root Node is: " << endl;
+		cout << "The hash of the Root Node is: " << endl;
 		firstTree->printRoot();
 		cout << endl;
 		sel++;

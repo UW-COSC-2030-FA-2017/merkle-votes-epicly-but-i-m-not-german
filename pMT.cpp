@@ -121,11 +121,11 @@ void pMT::hashBranches(int select)
 //New Method: print root node.
 void pMT::printRoot()
 {
-	myMerkle.it = myMerkle.getTrunk();
-	string pm = myMerkle.it->data;
-	for (int i = 0; i < pm.length(); i++)
+	string Dat = myMerkle.getDat(myMerkle.getTrunk());
+	const char * D = Dat.c_str();
+	for (int i = 0; i < Dat.length(); i++)
 	{
-		printf("%02x", i);
+		printf("%02x", D[i]);
 	}
 }
 
@@ -259,11 +259,11 @@ string pMT::hash_2(string key)
 	string hash;
 	int b = 59;
 	int a = 139;
-	for (int i = key.size(); i >0; i--)
+	for (int i = key.size(); i > 0; i--)
 	{
-		int hold = (keyCh[i] - 48);
-		hash = std::to_string(hold + hold *b);
-		b = b*b+a;
+		int hold = (keyCh[i] % 48);
+		hash += std::to_string(hold *b/a);
+		b = b + a;
 	}
 	return hash;
 }
@@ -280,7 +280,7 @@ string pMT::hash_3(string key)
 	int sum = 0;
 	for (int i = key.size(); i > 0; i--)
 	{
-		sum = sum + (int(keyCh[i]) * 2) * 1313;
+		sum = sum + (int(keyCh[i])%48) * 1313;
 		hash +=std::to_string(sum);
 	}
 	return hash;

@@ -20,10 +20,11 @@ bTREE::treeNode::~treeNode()
 	}
 }
 void bTREE::treeNode::print() {
-	string D = data;
-	for (int i = 0; i < D.length(); i++)
+	string Dat = data;
+	const char * D = Dat.c_str();
+	for (int i = 0; i < Dat.length(); i++)
 	{
-		printf("%02x", i);
+		printf("%02x", D[i]);
 	}
 }
 //look at descriptions in pMT.h for guidance on what you might need for these function to actually do
