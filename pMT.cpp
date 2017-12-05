@@ -1,4 +1,6 @@
 #include"pMT.h"
+#include<vector>
+using std::vector;
 pMT::pMT(int hashSelect)
 /**
  * @brief
@@ -9,13 +11,135 @@ pMT::pMT(int hashSelect)
 	selectedHash = hashSelect;
 }
 
+pMT::pMT(int sel, bTREE tree)
+{
+	selectedHash = sel;
+	myMerkle.setTrunk(tree.getTrunk());
+}
+
 pMT::~pMT()
 /**
  * @brief destructor
  * @return nada
  */
 {}
-//New Method: hashBranches will traverse the tree and set the string = to the hash of the two children;
+
+//New Method: hash branches will travers the merkle tree and set the hashes.
+void pMT::hashBranches(int select)
+{
+	vector<int> map;
+	int leftToHash = myMerkle.numberOfNodes() - myMerkle.getLeaves();
+	int level = 0;
+	int j = 2;
+	//calculating map.
+	myMerkle.it = myMerkle.getTrunk();
+	while (myMerkle.it->left->isLeaf == false)
+	{
+		myMerkle.it = myMerkle.it->left;
+		level++;
+	}
+	while (j <= level)
+	{
+		map.push_back(1);
+		map.push_back(j);
+		j++;
+	}
+	map.push_back(1);
+	while (j > 1)
+	{
+		j--;
+		map.push_back(j);
+		map.push_back(1);
+	}
+	map.push_back(level);
+	j = 0;
+	//begin hashing.
+	myMerkle.it = myMerkle.getTrunk();
+	while (leftToHash > 0)
+	{
+		string lval = "";
+		string rval = "";
+		string hash = "";
+		while (myMerkle.it->left &&	myMerkle.it->left->isLeaf == false)
+		{
+			myMerkle.it = myMerkle.it->left;
+		}
+		if (myMerkle.it->left) {
+			lval = myMerkle.getDat(myMerkle.it->left);
+		}
+		if (myMerkle.it->right) {
+			rval = myMerkle.getDat(myMerkle.it->right);
+		}
+		if (select == 1)
+		{
+			hash = hash_1(lval + rval);
+		}
+		if (select == 2)
+		{
+			hash = hash_2(lval + rval);
+		}
+		if (select == 3)
+		{
+			hash = hash_3(lval + rval);
+		}
+		myMerkle.it->data = hash;
+		leftToHash--;
+		if (myMerkle.it->parent) {
+			for (int i = 0; i < map[j]; i++)
+			{
+				myMerkle.it = myMerkle.it->parent;
+				if (myMerkle.it->left) {
+					lval = myMerkle.getDat(myMerkle.it->left);
+				}
+				else { lval = ""; }
+				if (myMerkle.it->right) {
+					rval = myMerkle.getDat(myMerkle.it->right);
+				}
+				else { rval = ""; }
+				if (select == 1)
+				{
+					hash = hash_1(lval + rval);
+				}
+				if (select == 2)
+				{
+					hash = hash_2(lval + rval);
+				}
+				if (select == 3)
+				{
+					hash = hash_3(lval + rval);
+				}
+			}
+			myMerkle.it = myMerkle.it->right;
+		}
+	}
+	if (myMerkle.it->parent) {
+		myMerkle.it = myMerkle.it->parent;
+	}
+	myMerkle.setTrunk(myMerkle.it);
+}
+
+//New Method: print root node.
+void pMT::printRoot()
+{
+	myMerkle.it = myMerkle.getTrunk();
+	string pm = myMerkle.it->data;
+	for (int i = 0; i < pm.length(); i++)
+	{
+		printf("%02x", i);
+	}
+}
+
+//get method for binary tree.
+bTREE pMT::getTree()
+{
+	return myMerkle;
+}
+
+//get method for selected hash
+int pMT::getSelhash()
+{
+	return selectedHash;
+}
 
 int pMT::insert(string vote, int time)
 /**
@@ -28,8 +152,7 @@ int pMT::insert(string vote, int time)
 {
 	myMerkle.opCount = 0;
 	myMerkle.insert(vote, time);
-	string rootHash = myMerkle.getTrunk()->getHash(this, selectedHash);
-	myMerkle.getTrunk()->data = rootHash;
+	hashBranches(selectedHash);
 	return myMerkle.opCount;
 }
 
@@ -103,7 +226,6 @@ string pMT::locateHash(string mhash)
 }
 
 
-
 string pMT::hash_1(string key)
 /**
  * @brief A function that takes in a key and returns a hash of that key using some custom function
@@ -115,11 +237,13 @@ string pMT::hash_1(string key)
 	string hash;
 	int a = 17;
 	int b = 23;
-	for (int i = 0; i < key.size(); i++)
+	int c = 199;
+	for (int i = 0; i < key.length(); i++)
 	{
 		int hold = (keyCh[i]%48);
-			hash = hold * a;
-			a = a * b + a;
+			hash += std::to_string(hold*a/c);
+			c = c + a;
+			a = a + b;
 	}
 	return hash;
 }
@@ -138,7 +262,7 @@ string pMT::hash_2(string key)
 	for (int i = key.size(); i >0; i--)
 	{
 		int hold = (keyCh[i] - 48);
-		hash = hold * hold +b;
+		hash = std::to_string(hold + hold *b);
 		b = b*b+a;
 	}
 	return hash;
@@ -156,8 +280,8 @@ string pMT::hash_3(string key)
 	int sum = 0;
 	for (int i = key.size(); i > 0; i--)
 	{
-		sum = sum + int(keyCh[i]) * 1313;
-		hash += sum;
+		sum = sum + (int(keyCh[i]) * 2) * 1313;
+		hash +=std::to_string(sum);
 	}
 	return hash;
 }
@@ -172,6 +296,7 @@ string pMT::hash_3(string key)
 {
 	 if (lhs.myMerkle == rhs.myMerkle)
 	 {
+
 		 return true;
 	 }
 	 else { return false; }
@@ -202,17 +327,28 @@ string pMT::hash_3(string key)
  */
 {
 	pMT hold = p;
-	hold.myMerkle.print(hold.myMerkle.getTrunk(), 0);
+	bTREE K = hold.getTree();
+	K.print(K.getTrunk(), 0);
 	return out;
 }
 
 
-//friend pMT pMT::operator ^(const pMT& lhs, const pMT& rhs)
+ pMT operator ^(const pMT& lhs, const pMT& rhs)
 /**
  * @brief Where do two trees differ
  * @param lhs
  * @param rhs
  * @return a tree comprised of the right hand side tree nodes that are different from the left
  */
-//{
-//}
+{
+	 pMT left = lhs;
+	 pMT right = rhs;
+	 if (left.getSelhash() == right.getSelhash()) {
+		 bTREE L = left.getTree();
+		 bTREE R = right.getTree();
+		 bTREE* result = L^R;
+		 pMT* ven = new pMT(left.getSelhash(), *result);
+		 return *ven;
+	 }
+	 else { cout <<endl<< "The Two Merkle Tree's use different hash functions." << endl; }
+}

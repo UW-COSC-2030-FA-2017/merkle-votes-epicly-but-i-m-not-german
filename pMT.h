@@ -18,8 +18,14 @@ private:
     
 public:
     pMT(int hashSelect);
+	pMT(int sel, bTREE tree);
     ~pMT();
     
+	//New Methods.
+	void hashBranches(int select);
+	void printRoot();
+	int getSelhash();
+	bTREE getTree();
     int insert(string vote, int time);
     
     int find(string data, int time, int hashSelect);

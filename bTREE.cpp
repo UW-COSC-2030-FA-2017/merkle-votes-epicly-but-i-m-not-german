@@ -10,7 +10,7 @@ using namespace::std;
 using std::queue;
 
 //struct node constructor
-bTREE::treeNode::treeNode() {}
+bTREE::treeNode::treeNode() { time = 0; data = ""; isLeaf = false; }
 bTREE::treeNode::~treeNode()
 {
 	if (left != 0 && right != 0)
@@ -20,11 +20,11 @@ bTREE::treeNode::~treeNode()
 	}
 }
 void bTREE::treeNode::print() {
-	cout << "--- " << "Data: " << this->data << " ---" << endl;
-	cout << "Time: " << this->time << " ---" << endl;
-	if (this->isLeaf == true) { cout << "Node IS a leaf node ---" << endl; }
-	else { cout << "Node is NOT a leaf node ---" << endl; }
-
+	string D = data;
+	for (int i = 0; i < D.length(); i++)
+	{
+		printf("%02x", i);
+	}
 }
 //look at descriptions in pMT.h for guidance on what you might need for these function to actually do
 bTREE::bTREE()
@@ -34,130 +34,28 @@ bTREE::bTREE()
 }
 bTREE::~bTREE() {}
 
-//newMethod: GetHash will iterate through the tree and set the correct hash keys with a reference to Merkle, then return the hash key for the root node.
-template <typename T>
-string  bTREE::treeNode::getHash(T mrkl, int type)
+//newMethod: pseudo copy constructor by replacing the trunk with a new trunk.
+void bTREE::setTrunk(treeNode* sappling)
 {
-	if (left != 0 && right != 0 && !left->isLeaf && !right->isLeaf)
-	{
-		string lval = left->getHash(mrkl, type);
-		string rval = right->getHash(mrkl, type);
-		if (type == 1)
-		{
-			string values = lval + rval;
-			data = mrkl->hash_1(values);
-			return data;
-		}
-		else if (type == 2)
-		{
-			string values = lval + rval;
-			data = mrkl->hash_2(values);
-			return data;
-		}
-		else if (type == 3)
-		{
-			string values = lval + rval;
-			data = mrkl->hash_3(values);
-			return data;
-		}
-	}
-	else if (left != 0 && right == 0 && !left->isLeaf)
-	{
-		string lval = left->getHash(mrkl, type);
-		if (type == 1)
-		{
-			data = mrkl->hash_1(lval);
-			return data;
-		}
-		else if (type == 2)
-		{
-			data = mrkl->hash_2(lval);
-			return data;
-		}
-		else if (type == 3)
-		{
-			data = mrkl->hash_3(lval);
-			return data;
-		}
-	}
-	else if (left == 0 && right != 0 && !right->isLeaf)
-	{
-		string rval = right->getHash(mrkl, type);
-		if (type == 1)
-		{
-			data = mrkl->hash_1(rval);
-			return data;
-		}
-		else if (type == 2)
-		{
-			data = mrkl->hash_2(rval);
-			return data;
-		}
-		else if (type == 3)
-		{
-			data = mrkl->hash_3(rval);
-			return data;
-		}
-	}
-	else if (left != 0 && right != 0 && left->isLeaf == true && right->isLeaf == true)
-	{
-		string lval = left->data;
-		string rval = right->data;
-		string values = lval + rval;
-		 if (type == 1)
-		{
-			data = mrkl->hash_1(values);
-			return data;
-		}
-		else if (type == 2)
-		{
-			data = mrkl->hash_2(values);
-			return data;
-		}
-		else if (type == 3)
-		{
-			data = mrkl->hash_3(values);
-			return data;
-		}
-	}
-	else if (left != 0 && right == 0 && left->isLeaf)
-	{
-		string lval = left->data;
-		 if (type == 1)
-		{
-			data = mrkl->hash_1(lval);
-			return data;
-		}
-		else if (type == 2)
-		{
-			data = mrkl->hash_2(lval);
-			return data;
-		}
-		else if (type == 3)
-		{
-			data = mrkl->hash_3(lval);
-			return data;
-		}
-	}
-	else if (left == 0 && right != 0 && right->isLeaf)
-	{
-		string rval = right->data;
-		 if (type == 1)
-		{
-			data = mrkl->hash_1(rval);
-			return data;
-		}
-		else if (type == 2)
-		{
-			data = mrkl->hash_2(rval);
-			return data;
-		}
-		else if (type == 3)
-		{
-			data = mrkl->hash_3(rval);
-			return data;
-		}
-	}
+	trunk = sappling;
+	inTraversal(trunk);
+}
+
+//new mwthods: returns data from referenced node.
+string bTREE::getDat(treeNode * node)
+{
+	string hold = node->data;
+	return hold;
+}
+
+//New Method: returns amount of leaf nodes.
+int bTREE::getLeaves()
+{
+	totalNodes = 0;
+	leafNodes = 0;
+	dataNodes = 0;
+	inTraversal(trunk);
+	return leafNodes;
 }
 //New Method get Trunk returns trunk.
 bTREE::treeNode* bTREE::getTrunk()
@@ -183,7 +81,7 @@ void bTREE::print(treeNode* root, int pos)
 	{
 		print(root->right, pos + 1);
 		padding('\t', pos);
-		printf("%d\n", root->data);
+		root->print();
 		print(root->left, pos + 1);
 	}
 }
@@ -281,7 +179,7 @@ bTREE::treeNode * bTREE::findParent(treeNode * root)
 	dataNodes = 0;
 	inTraversal(root);
 	treeNode * hold = 0;
-	if(root->isLeaf == false)
+	if(root->left && root->isLeaf == false)
 	{
 		if (root->left != 0 && root->right == 0)
 		{
@@ -327,6 +225,7 @@ int bTREE::insert(string data, int time)
 		tree.push_front(*empty);
 		trunk = empty;
 		trunk->left = node;
+		node->parent = trunk;
 		totalNodes = 0;
 		leafNodes = 0;
 		dataNodes = 0;
@@ -337,6 +236,7 @@ int bTREE::insert(string data, int time)
 		treeNode * found = findParent(trunk);
 		if (found->isLeaf == false)
 		{
+			node->parent = found;
 			found->right = node;
 			totalNodes = 0;
 			leafNodes = 0;
@@ -353,6 +253,7 @@ int bTREE::insert(string data, int time)
 			{
 				leaf = leaf->left;
 			}
+			node->parent = leaf;
 			leaf->left = node;
 			totalNodes = 0;
 			leafNodes = 0;
@@ -431,15 +332,21 @@ string bTREE::locate(string me)
 
  bool operator ==(const bTREE& lhs, const bTREE& rhs)
 {
-	 bTREE::treeNode startL = *lhs.trunk;
-	 bTREE::treeNode startR = *rhs.trunk;
-	 int i = 0;
-	 if (startL.data == startR.data) { i++; }
-	 if (lhs.leafNodes == rhs.leafNodes) { i++; }
-	 if (lhs.dataNodes == rhs.dataNodes) { i++; }
-	 if (lhs.totalNodes == rhs.totalNodes) { i++; }
-	 if (i == 4) { return true; }
-	 else { return false; }
+	 if (lhs.trunk->data.size() != 0 && rhs.trunk->data.size() != 0)
+	 {
+		 bTREE::treeNode startL = *lhs.trunk;
+		 bTREE::treeNode startR = *rhs.trunk;
+		 int i = 0;
+		 if (startL.data == startR.data) { i++; }
+		 if (startL.left->data == startR.left->data) { i++; }
+		 if (startL.right->data == startR.right->data) { i++; }
+		 if (lhs.leafNodes == rhs.leafNodes) { i++; }
+		 if (lhs.dataNodes == rhs.dataNodes) { i++; }
+		 if (lhs.totalNodes == rhs.totalNodes) { i++; }
+		 if (i == 6) { return true; }
+		 else { return false; }
+	 }
+	 else { cout << "At least one of the trees is empty." << endl; return false; }
 }
 
  bool operator !=(const bTREE& lhs, const bTREE& rhs)
@@ -448,10 +355,12 @@ string bTREE::locate(string me)
 	 bTREE::treeNode startR = *rhs.trunk;
 	 int i = 0;
 	 if (startL.data == startR.data) { i++; }
+	 if (startL.left->data == startR.left->data) { i++; }
+	 if (startL.right->data == startR.right->data) { i++; }
 	 if (lhs.leafNodes == rhs.leafNodes) { i++; }
 	 if (lhs.dataNodes == rhs.dataNodes) { i++; }
 	 if (lhs.totalNodes == rhs.totalNodes) { i++; }
-	 if (i != 4) { return true; }
+	 if (i != 6) { return true; }
 	 else { return false; }
 }
 
@@ -462,4 +371,38 @@ string bTREE::locate(string me)
 	 hold.print(temp, 0);
 	 return out;
 }
-
+ bTREE * operator ^(const bTREE& lhs, const bTREE& rhs)
+ {
+	 int check = 0;
+	 bTREE left = lhs;
+	 bTREE right = rhs;
+	 bTREE * resultL = NULL;
+	 bTREE * resultR = NULL;
+	 if (!left.trunk->left->isLeaf && !right.trunk->left->isLeaf)
+	 {
+		 left.setTrunk(left.trunk->left);
+		 right.setTrunk(right.trunk->left);
+		  resultL = left ^ right;
+	 }
+	 if (!left.trunk->right->isLeaf && !right.trunk->right->isLeaf)
+	 {
+		 left = lhs;
+		 right = rhs;
+		 left.setTrunk(left.trunk->right);
+		 right.setTrunk(right.trunk->right);
+		  resultR = left ^ right;
+	 }
+	 if (left == right)
+	 {
+			 return &left;
+	 }
+	 else if (resultL != NULL)
+	 {
+		 return resultL;
+	 }
+	 else if (resultR != NULL)
+	 {
+		 return resultR;
+	 }
+	 return NULL;
+ }
